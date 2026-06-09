@@ -556,6 +556,7 @@
   <div class="shell">
     <aside class="sidebar glass">
       <div class="profile-orb" title="Agent Smith"></div>
+      <button onclick="toggleSidebar()" style="width:100%;height:36px;border-radius:10px;background:rgba(0,212,255,0.08);border:1px solid rgba(120,220,255,0.22);color:#d6f0ff;font-size:11px;letter-spacing:0.5px;cursor:pointer;margin-bottom:4px;transition:all .22s ease;" title="Toggle sidebar">◀ Collapse</button>
       <div class="nav-item active" data-tab="tab-home">
         <span style="width:18px;height:18px;opacity:.9">🏠</span>
         <span>Home</span>
@@ -600,7 +601,7 @@
       <div id="clockDisplay" style="font-family:var(--font-mono); font-size:12px; letter-spacing:0.6px; color:#8aaac5; min-width:68px; text-align:center;">00:00:00</div>
       <div class="chips">
         <div class="chip" id="modelChip" style="cursor:pointer;" title="Switch model">Claude 3.5 Sonnet</div>
-        <div class="chip">v2.4.1</div>
+        <div class="chip">v3.0.0</div>
       </div>
       <div id="modelMenu" style="display:none; position:absolute; margin-top:34px; right:calc(100% + 8px); background:rgba(7,18,36,0.95); border:1px solid rgba(120,220,255,0.35); border-radius:12px; padding:6px; min-width:220px; box-shadow: 0 16px 40px rgba(0,0,0,0.45);">
         <div class="model-option" style="padding:8px 10px; border-radius:10px; cursor:pointer;" data-model="claude-sonnet">Claude 3.5 Sonnet</div>
@@ -639,7 +640,7 @@
           </div>
         </div>
 
-        <div style="position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius); background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55));">
+        <div style="display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius);">
           <div class="orb-zone">
             <div class="orb" id="mainOrb"></div>
             <div class="orb-rings"></div>
@@ -821,7 +822,10 @@
       const sb = document.querySelector('.sidebar');
       if (!sb) return;
       sb.classList.toggle('collapsed');
-      appendLog('ui', 'Sidebar collapsed: ' + String(sb.classList.contains('collapsed')));
+      const btn = document.querySelector('button[title="Toggle sidebar"]');
+      const collapsed = sb.classList.contains('collapsed');
+      if (btn) btn.textContent = collapsed ? '▶ Expand' : '◀ Collapse';
+      appendLog('ui', 'Sidebar collapsed: ' + collapsed);
     };
 
     // Live API hook: Anthropic/Claude - replace this with your fetch()
