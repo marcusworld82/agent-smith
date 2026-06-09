@@ -75,7 +75,7 @@
     position: relative; z-index: 1;
     height: 100vh;
     display: grid;
-    grid-template-columns: 220px 1fr 280px;
+    grid-template-columns: var(--sidebar-w, 220px) 1fr 280px;
     grid-template-rows: 48px 1fr 86px;
     grid-template-areas:
       "sidebar topbar topbar"
@@ -83,6 +83,7 @@
       "sidebar bottom bottom";
     gap: 10px;
     padding: 10px;
+    transition: grid-template-columns 0.28s ease;
   }
 
   .glass {
@@ -611,7 +612,7 @@
     </header>
 
     <section class="main">
-      <div id="tab-home" class="tab-view active" style="grid-template-columns:260px 1fr 220px; padding:10px; gap:10px;">
+      <div id="tab-home" class="tab-view active" style="display:grid; grid-template-columns:260px 1fr 220px; gap:10px; padding:10px; height:100%; width:100%;">
         <div class="pane">
           <div class="list-card">
             <div class="panel-title">Active Agents</div>
@@ -640,7 +641,7 @@
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius);">
+        <div style="display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius); background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55)); min-height:0; height:100%; align-self:stretch;">
           <div class="orb-zone">
             <div class="orb" id="mainOrb"></div>
             <div class="orb-rings"></div>
@@ -820,12 +821,13 @@
     // Sidebar toggle for compact mode
     window.toggleSidebar = function () {
       const sb = document.querySelector('.sidebar');
-      if (!sb) return;
-      sb.classList.toggle('collapsed');
-      const btn = document.querySelector('button[title="Toggle sidebar"]');
-      const collapsed = sb.classList.contains('collapsed');
-      if (btn) btn.textContent = collapsed ? '▶ Expand' : '◀ Collapse';
-      appendLog('ui', 'Sidebar collapsed: ' + collapsed);
+      const shell = document.querySelector('.shell');
+      if (!sb || !shell) return;
+      const isCollapsed = sb.classList.toggle('collapsed');
+      shell.style.setProperty('--sidebar-w', isCollapsed ? '66px' : '220px');
+      const btn = sb.querySelector('button');
+      if (btn) btn.textContent = isCollapsed ? '▶ Expand' : '◀ Collapse';
+      appendLog('ui', 'Sidebar ' + (isCollapsed ? 'collapsed' : 'expanded'));
     };
 
     // Live API hook: Anthropic/Claude - replace this with your fetch()
