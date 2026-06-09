@@ -44,6 +44,33 @@
     background-size: 64px 64px, 64px 64px;
     mask-image: radial-gradient(1200px 900px at 50% 40%, black, transparent 72%);
   }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(120,220,255,0.08) 1px, transparent 1px);
+    background-size: 100% 90px;
+    mask-image: linear-gradient(180deg, black, transparent 75%);
+    animation: scanPulse 8s linear infinite;
+  }
+  @keyframes scanPulse {
+    0% { opacity: 0.18; transform: translateY(0); }
+    50% { opacity: 0.35; transform: translateY(-8px); }
+    100% { opacity: 0.18; transform: translateY(0); }
+  }
+  @keyframes subtlePulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  @keyframes typingPulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.85; }
+  }
+
+  /* Global polish */
+  .data-panel, .status-card, .list-card, .kpi, .mini-chart {
+    box-shadow: 0 0 18px rgba(0,212,255,0.10), 0 8px 24px rgba(0,0,0,0.35);
+  }
   .shell {
     position: relative; z-index: 1;
     height: 100vh;
@@ -367,18 +394,120 @@
   .tab-view.active { display: grid; }
 
   /* Chat */
-  .chat-area {
-    display: flex; flex-direction: column; gap: 8px; padding: 10px;
-    overflow: hidden;
+  .chat-shell {
+    display: flex; flex-direction: column; gap: 10px; height: 100%;
+  }
+  .chat-header {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .chat-header .panel-label {
+    font-size: 11px; letter-spacing: 0.8px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;
+  }
+  .chat-thread {
+    flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;
   }
   .chat-msg {
     max-width: 68%;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 14px;
     background: rgba(7,18,36,0.82);
     border: 1px solid var(--border);
     font-size: 12.5px;
+    display: flex; gap: 8px; align-items: flex-start;
+    animation: subtlePulse 3s ease-in-out infinite;
   }
+  .chat-msg.user {
+    align-self: flex-end; border-color: rgba(120, 220, 255, 0.35);
+  }
+  .avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue));
+    box-shadow: 0 0 10px var(--glow-cyan);
+    flex-shrink: 0;
+  }
+  .chat-input-bar {
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(7,18,36,0.70);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+  .chat-input-bar input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-family: var(--font-ui); font-size: 12.5px;
+  }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(0,212,255,0.10); border: 1px solid rgba(120,220,255,0.22);
+    color: #d6f0ff; display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s ease;
+  }
+  .icon-btn:hover {
+    background: rgba(0,212,255,0.18); border-color: rgba(120,220,255,0.45);
+    box-shadow: 0 0 14px rgba(0,212,255,0.28);
+  }
+  .typing {
+    display: inline-flex; gap: 4px; padding: 8px 10px; border-radius: 12px;
+    background: rgba(7,18,36,0.82); border: 1px solid var(--border);
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: #8aaac5;
+    animation: typingPulse 1s ease-in-out infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+
+  /* Chat scrollbar */
+  .chat-thread::-webkit-scrollbar { width: 6px; }
+  .chat-thread::-webkit-scrollbar-thumb { background: rgba(120,220,255,0.26); border-radius: 9px; }
+
+  /* iframe tiles */
+  .iframe-tabs { display: none; position: absolute; inset: 0; flex-direction: column; gap: 10px; padding: 10px; }
+  .iframe-tabs.active { display: flex; }
+  .iframe-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .iframe-wrap {
+    flex: 1; position: relative; overflow: hidden;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55));
+    min-height: 0;
+  }
+  .iframe-wrap iframe {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+  }
+  .offline-cover {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 20px;
+  }
+  .offline-cover .icon-glow {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(180,220,255,0.22), rgba(45,122,255,0.10));
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.35);
+    animation: orbPulse 4.4s ease-in-out infinite;
+  }
+  .offline-cover .panel-title { color: #bcd7ff; }
+  .offline-cover button {
+    margin-top: 4px;
+  }
+
+  /* Orb polish */
+  .orb-state-label {
+    position: absolute; bottom: -26px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; letter-spacing: 1.2px; color: #8aaac5; font-weight: 700;
+    background: rgba(7,18,36,0.72); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .orb-controls {
+    display: flex; gap: 8px; justify-content: center; margin-top: 6px;
+  }
+  .state-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,212,255,0.08); border: 1px solid rgba(120,220,255,0.28);
+    color: #d6f0ff; display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .22s ease;
+  }
+  .state-btn:hover { background: rgba(0,212,255,0.18); box-shadow: 0 0 18px rgba(0,212,255,0.28); }
+  .state-btn.active { background: rgba(0,212,255,0.22); border-color: rgba(120,220,255,0.55); box-shadow: 0 0 18px rgba(0,212,255,0.35); }
 
   /* Status views */
   .status-grid {
@@ -445,12 +574,13 @@
       <div class="brand">
         <div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue));box-shadow:0 0 14px var(--glow-cyan);"></div>
         <span>Agent Smith</span>
-        <span class="status-pill">
+        <span class="status-pill" id="statusPill" style="animation: subtlePulse 3.6s ease-in-out infinite;">
           <span style="width:8px;height:8px;border-radius:50%;background:#4ef0a0;box-shadow:0 0 8px rgba(78,240,160,.7);"></span>
           ONLINE
         </span>
       </div>
       <input class="cmd-field" placeholder="Command or search..." aria-label="Command or search" />
+      <div id="clockDisplay" style="font-family:var(--font-mono); font-size:12px; letter-spacing:0.6px; color:#8aaac5; min-width:68px; text-align:center;">00:00:00</div>
       <div class="chips">
         <div class="chip">Claude 3.5 Sonnet</div>
         <div class="chip">v2.4.1</div>
