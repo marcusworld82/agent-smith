@@ -3,176 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Smith</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Agent Smith — Command Bridge</title>
 <style>
   :root {
-    --bg-deep: #030711;
-    --bg-panel: rgba(8, 18, 38, 0.72);
+    --bg-deep: #020a18;
+    --bg-panel: rgba(7, 18, 36, 0.72);
     --bg-card: rgba(10, 22, 44, 0.55);
     --border: rgba(100, 220, 255, 0.12);
-    --border-active: rgba(120, 220, 255, 0.4);
+    --border-active: rgba(120, 220, 255, 0.32);
     --text-primary: #e6f2ff;
     --text-muted: #7d9ab8;
     --accent-cyan: #00d4ff;
     --accent-blue: #2d7aff;
     --accent-magenta: #b44dff;
-    --accent-purple: #7b5cff;
-    --glow-cyan: rgba(0, 212, 255, 0.55);
-    --glow-blue: rgba(45, 122, 255, 0.55);
-    --glow-magenta: rgba(180, 77, 255, 0.55);
-    --glass-blur: 18px;
+    --glow-cyan: rgba(0, 212, 255, 0.5);
     --radius: 14px;
     --radius-sm: 10px;
-    --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
   }
-
+  * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
     height: 100%;
     font-family: var(--font-ui);
     color: var(--text-primary);
     background:
-      radial-gradient(1200px 800px at 50% 30%, rgba(20, 60, 180, 0.18), transparent 60%),
-      radial-gradient(800px 600px at 80% 70%, rgba(90, 30, 180, 0.10), transparent 60%),
-      linear-gradient(180deg, #020918 0%, #050c20 55%, #030b1b 100%);
+      radial-gradient(1200px 900px at 50% 28%, rgba(20, 60, 180, 0.16), transparent 60%),
+      radial-gradient(900px 700px at 82% 70%, rgba(90, 30, 180, 0.10), transparent 60%),
+      linear-gradient(180deg, #020918 0%, #050c20 55%, #040f1f 100%);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    letter-spacing: 0.2px;
   }
-
-  /* Scanline + noise */
   body::before {
     content: '';
-    position: fixed; inset: 0; z-index: 0;
-    pointer-events: none;
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image:
       linear-gradient(rgba(100, 220, 255, 0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(100, 220, 255, 0.04) 1px, transparent 1px);
-    background-size: 60px 60px, 60px 60px;
-    mask-image: radial-gradient(1200px 900px at 50% 40%, black, transparent 70%);
+    background-size: 64px 64px, 64px 64px;
+    mask-image: radial-gradient(1200px 900px at 50% 40%, black, transparent 72%);
   }
-  body::after {
-    content: '';
-    position: fixed; inset: 0; z-index: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(300px 300px at 50% 50%, rgba(0, 212, 255, 0.06), transparent 60%),
-      radial-gradient(200px 200px at 30% 70%, rgba(180, 77, 255, 0.04), transparent 60%);
-    mix-blend-mode: screen;
-    animation: noiseDrift 18s linear infinite;
-  }
-  @keyframes noiseDrift {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-15px, 10px) scale(1.05); }
-    100% { transform: translate(0, 0) scale(1); }
-  }
-
-  /* Layout */
   .shell {
     position: relative; z-index: 1;
     height: 100vh;
     display: grid;
-    grid-template-columns: 64px 1fr 320px;
-    grid-template-rows: 48px 1fr 96px;
+    grid-template-columns: 220px 1fr 280px;
+    grid-template-rows: 48px 1fr 86px;
     grid-template-areas:
       "sidebar topbar topbar"
       "sidebar main right"
       "sidebar bottom bottom";
     gap: 10px;
     padding: 10px;
-    box-sizing: border-box;
   }
 
-  /* Glassmorphism base */
   .glass {
     background: var(--bg-panel);
-    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid var(--border);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px rgba(0,0,0,0.35);
     border-radius: var(--radius);
   }
 
-  /* Sidebar */
+  /* Sidebar rail */
   .sidebar {
     grid-area: sidebar;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 12px 8px;
+    display: flex; flex-direction: column;
+    padding: 12px 10px;
     gap: 6px;
+    overflow-y: auto;
   }
   .profile-orb {
     width: 36px; height: 36px; border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue));
-    box-shadow: 0 0 18px var(--glow-cyan), 0 0 40px rgba(45, 122, 255, 0.35);
+    box-shadow: 0 0 18px var(--glow-cyan), 0 0 44px rgba(45, 122, 255, 0.35);
     margin-bottom: 6px;
   }
   .nav-item {
-    width: 48px; height: 48px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; gap: 8px; padding: 0 10px;
     color: var(--text-muted);
-    transition: all .25s ease;
+    transition: all .22s ease;
     cursor: pointer;
     position: relative;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.2px;
+    background: transparent; border: 1px solid transparent;
   }
   .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(0, 212, 255, 0.08);
-    box-shadow: 0 0 18px rgba(0, 212, 255, 0.18);
+    background: rgba(0, 212, 255, 0.07);
+    border-color: rgba(120, 220, 255, 0.22);
   }
   .nav-item.active {
-    color: var(--accent-cyan);
-    background: rgba(0, 212, 255, 0.14);
-    box-shadow: 0 0 22px rgba(0, 212, 255, 0.25);
+    color: var(--accent-cyan); font-weight: 600;
+    background: rgba(0, 212, 255, 0.13);
+    border-color: rgba(120, 220, 255, 0.40);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25);
   }
-  .nav-item .tooltip {
-    position: absolute; left: 62px; top: 50%;
-    transform: translateY(-50%);
-    background: rgba(4, 10, 22, 0.95);
-    padding: 6px 10px; border-radius: 8px;
-    font-size: 11px; letter-spacing: 0.4px; font-weight: 500;
-    color: var(--text-primary);
-    border: 1px solid var(--border-active);
-    opacity: 0; pointer-events: none;
-    transition: opacity .15s ease;
-    white-space: nowrap;
-  }
-  .nav-item:hover .tooltip { opacity: 1; }
   .system-pip {
     margin-top: auto;
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 8px; height: 8px; border-radius: 50%;
     background: var(--accent-cyan);
-    box-shadow: 0 0 10px var(--glow-cyan);
+    box-shadow: 0 0 12px var(--glow-cyan);
     animation: pip 2.2s ease-in-out infinite;
   }
   @keyframes pip {
-    0%, 100% { opacity: 0.45; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
+    0%, 100% { opacity: .45; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
   }
 
   /* Topbar */
   .topbar {
     grid-area: topbar;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 14px;
     gap: 12px;
   }
-  .topbar .brand {
+  .brand {
     display: flex; align-items: center; gap: 10px;
-    font-weight: 600; letter-spacing: 0.5px;
+    font-weight: 700; letter-spacing: 0.5px;
   }
-  .topbar .status-pill {
+  .status-pill {
     display: flex; align-items: center; gap: 8px;
     padding: 5px 10px; border-radius: 999px;
     background: rgba(0, 212, 255, 0.10);
     border: 1px solid rgba(120, 220, 255, 0.28);
-    font-size: 11px; letter-spacing: 0.6px; font-weight: 500;
+    font-size: 11px; letter-spacing: 0.6px; font-weight: 600;
   }
   .cmd-field {
-    flex: 1; max-width: 460px;
+    flex: 1; max-width: 480px;
     height: 34px; border-radius: 999px;
     background: rgba(0, 212, 255, 0.06);
     border: 1px solid rgba(120, 220, 255, 0.25);
@@ -181,13 +142,10 @@
     font-family: var(--font-ui);
     font-size: 12.5px;
     outline: none;
-    transition: box-shadow .25s ease; 
+    transition: box-shadow .25s ease;
   }
   .cmd-field::placeholder { color: #5b7491; letter-spacing: 0.3px; }
-  .cmd-field:focus {
-    box-shadow: 0 0 14px rgba(0, 212, 255, 0.25);
-    border-color: rgba(120, 220, 255, 0.6);
-  }
+  .cmd-field:focus { box-shadow: 0 0 14px rgba(0, 212, 255, 0.25); border-color: rgba(120, 220, 255, 0.6); }
   .chips { display: flex; gap: 8px; }
   .chip {
     padding: 5px 10px; border-radius: 999px;
@@ -196,109 +154,116 @@
     font-size: 11px; letter-spacing: 0.6px; font-weight: 500;
   }
 
-  /* Main */
+  /* Main workspace */
   .main {
     grid-area: main;
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55));
   }
-  .panels-grid {
+  .main-inner {
     position: absolute; inset: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 12px;
-    padding: 6px;
+    grid-template-columns: 260px 1fr 220px;
+    gap: 10px; padding: 10px;
   }
+  .pane { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
   .data-panel {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
+    background: rgba(7,18,36,0.72);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 12px 14px;
     display: flex; flex-direction: column; justify-content: space-between;
-    transition: all .3s ease;
+    transition: all .28s ease;
     position: relative;
   }
   .data-panel:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     border-color: rgba(120, 220, 255, 0.45);
     box-shadow: 0 0 24px rgba(0, 212, 255, 0.18), 0 10px 30px rgba(0,0,0,0.35);
   }
-  .data-panel .panel-title {
+  .panel-title {
     font-size: 10px; text-transform: uppercase;
-    letter-spacing: 1px; color: var(--text-muted); font-weight: 600;
+    letter-spacing: 1px; color: var(--text-muted); font-weight: 700;
   }
-  .data-panel .panel-value {
-    font-size: 22px; font-weight: 700;
+  .panel-value {
+    font-size: 22px; font-weight: 800;
     letter-spacing: 0.3px;
     background: linear-gradient(180deg, #ffffff, #bcd7ff);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .data-panel .panel-meta {
+  .panel-meta {
     font-family: var(--font-mono); font-size: 10px; color: #7aa5c8;
   }
-  .panel-mini {
-    height: 26px; border-radius: 6px; overflow: hidden;
-    background: linear-gradient(180deg, rgba(0,212,255,0.18), rgba(45,122,255,0.05));
-    margin-top: 8px; position: relative;
+  .list-card {
+    background: rgba(7,18,36,0.72);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 8px;
   }
-  .panel-mini::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: repeating-linear-gradient(90deg, rgba(255,255,255,0.09) 0 1.5px, transparent 1.5px 4px);
+  .list-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
   }
+  .agent-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px; border-radius: 8px;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(120,220,255,0.18);
+    font-size: 11px; color: #c9e2ff; font-weight: 500;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.g { background: #4ef0a0; box-shadow: 0 0 8px rgba(78,240,160,0.6); }
+  .dot.y { background: #ffd066; box-shadow: 0 0 8px rgba(255,208,102,0.6); }
+  .dot.r { background: #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.55); }
 
-  /* Orb zone over panels */
+  /* Central orb area */
   .orb-zone {
     position: absolute;
     top: 50%; left: 50%;
-    width: 280px; height: 280px;
+    width: 230px; height: 230px;
     transform: translate(-50%, -50%);
     pointer-events: none;
   }
-
-  /* Orb */
   .orb {
     position: absolute; inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, rgba(180, 220, 255, 0.18), transparent 60%),
-                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.25), rgba(45, 122, 255, 0.05) 70%, transparent 100%);
-    box-shadow: 0 0 60px rgba(0, 212, 255, 0.35), 0 0 120px rgba(45, 122, 255, 0.18);
-    transition: background .6s ease, box-shadow .6s ease;
+    background: radial-gradient(circle at 38% 32%, rgba(180,220,255,0.18), transparent 60%), radial-gradient(circle at 50% 50%, rgba(0,212,255,0.22), rgba(45,122,255,0.05) 72%, transparent 100%);
+    box-shadow: 0 0 60px rgba(0,212,255,0.35), 0 0 120px rgba(45,122,255,0.18);
     animation: orbPulse 4.4s ease-in-out infinite;
   }
   .orb.state-listening {
-    background: radial-gradient(circle at 38% 32%, rgba(170, 240, 255, 0.25), transparent 60%),
-                radial-gradient(circle at 50% 50%, rgba(0, 200, 255, 0.30), rgba(0, 150, 220, 0.08) 70%, transparent 100%);
-    box-shadow: 0 0 70px rgba(0, 210, 255, 0.45), 0 0 140px rgba(45, 200, 255, 0.22);
+    background: radial-gradient(circle at 38% 32%, rgba(170,240,255,0.24), transparent 60%), radial-gradient(circle at 50% 50%, rgba(0,210,255,0.28), rgba(0,150,220,0.08) 72%, transparent 100%);
+    box-shadow: 0 0 74px rgba(0,210,255,0.44), 0 0 140px rgba(45,200,255,0.22);
     animation: orbPulse 3.2s ease-in-out infinite;
   }
   .orb.state-speaking {
-    background: radial-gradient(circle at 38% 32%, rgba(235, 210, 255, 0.28), transparent 60%),
-                radial-gradient(circle at 50% 50%, rgba(160, 110, 255, 0.30), rgba(140, 60, 255, 0.10) 70%, transparent 100%);
-    box-shadow: 0 0 80px rgba(180, 110, 255, 0.50), 0 0 160px rgba(140, 60, 255, 0.24);
+    background: radial-gradient(circle at 38% 32%, rgba(235,210,255,0.28), transparent 60%), radial-gradient(circle at 50% 50%, rgba(160,110,255,0.28), rgba(140,60,255,0.10) 72%, transparent 100%);
+    box-shadow: 0 0 84px rgba(180,110,255,0.50), 0 0 160px rgba(140,60,255,0.24);
     animation: orbPulse 2.6s ease-in-out infinite;
   }
   @keyframes orbPulse {
     0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
     50% { transform: scale(1.03); filter: hue-rotate(8deg); }
   }
-
   .orb-rings {
     position: absolute; inset: 0;
     border-radius: 50%;
-    border: 1px solid rgba(120, 220, 255, 0.22);
-    box-shadow: inset 0 0 40px rgba(0, 212, 255, 0.15);
-    animation: spinSlow 16s linear infinite;
+    border: 1px solid rgba(120,220,255,0.22);
+    box-shadow: inset 0 0 40px rgba(0,212,255,0.14);
+    animation: spinSlow 18s linear infinite;
   }
   .orb-rings::before, .orb-rings::after {
-    content: ''; position: absolute; border-radius: 50%; border: 1px dashed rgba(180, 220, 255, 0.35);
+    content: ''; position: absolute; border-radius: 50%; border: 1px dashed rgba(180,220,255,0.38);
     inset: 18px;
   }
   .orb-rings::after {
-    inset: 36px;
+    inset: 38px;
     border-style: dotted;
-    animation: spinSlow 22s linear infinite reverse;
+    animation: spinSlow 24s linear infinite reverse;
   }
   @keyframes spinSlow {
     from { transform: rotate(0deg); }
@@ -309,23 +274,21 @@
     width: 10px; height: 10px; border-radius: 50%;
     transform: translate(-50%, -50%);
     background: radial-gradient(circle, #ffffff, var(--accent-cyan));
-    box-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--glow-cyan);
+    box-shadow: 0 0 22px var(--accent-cyan), 0 0 44px var(--glow-cyan);
     animation: coreGlow 2.2s ease-in-out infinite;
   }
   .orb.state-speaking .orb-core {
     background: radial-gradient(circle, #ffffff, #e6c2ff);
-    box-shadow: 0 0 24px var(--accent-magenta), 0 0 48px var(--glow-magenta);
+    box-shadow: 0 0 26px var(--accent-magenta), 0 0 52px rgba(180, 77, 255, 0.55);
   }
   @keyframes coreGlow {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
     50% { transform: translate(-50%, -50%) scale(1.25); }
   }
-
-  /* Orbital particles */
   .orbit {
-    position: absolute; inset: -30px;
+    position: absolute; inset: -28px;
     border-radius: 50%;
-    animation: orbitSpin 8s linear infinite;
+    animation: orbitSpin 9s linear infinite;
   }
   .orbit::after {
     content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
@@ -333,17 +296,21 @@
     background: var(--accent-cyan);
     box-shadow: 0 0 14px var(--glow-cyan);
   }
-  .orbit.slow { animation-duration: 14s; inset: -50px; }
-  .orbit.slow::after { background: var(--accent-blue); box-shadow: 0 0 14px var(--glow-blue); }
-  @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .orbit.slow { animation-duration: 15s; inset: -50px; }
+  .orbit.slow::after { background: var(--accent-blue); box-shadow: 0 0 14px rgba(45,122,255,0.6); }
+  @keyframes orbitSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 
-  /* Right panel */
+  /* Right mission strip */
   .right-panel {
     grid-area: right;
     padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    overflow-y: auto;
   }
   .status-card {
-    background: var(--bg-card);
+    background: rgba(7,18,36,0.72);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 12px;
@@ -353,21 +320,29 @@
     color: var(--text-muted);
   }
   .status-value {
-    font-size: 14px; font-weight: 600; margin-top: 4px;
+    font-size: 14px; font-weight: 700; margin-top: 4px;
   }
   .mini-chart {
-    height: 60px; border-radius: 8px; overflow: hidden;
+    height: 56px; border-radius: 8px; overflow: hidden;
     background: linear-gradient(180deg, rgba(0,212,255,0.10), rgba(45,122,255,0.03));
     position: relative;
   }
   .mini-chart::before {
     content: '';
     position: absolute; inset: 0;
-    background:
-      linear-gradient(180deg, rgba(120,220,255,0.25), transparent 35%),
-      linear-gradient(90deg, rgba(120,220,255,0.08) 1px, transparent 1px);
+    background: linear-gradient(180deg, rgba(120,220,255,0.22), transparent 32%), linear-gradient(90deg, rgba(120,220,255,0.08) 1px, transparent 1px);
     background-size: 100% 100%, 10px 10px;
   }
+  .action-btn {
+    padding: 8px 14px; border-radius: 10px;
+    background: linear-gradient(180deg, rgba(0,212,255,0.22), rgba(45,122,255,0.12));
+    border: 1px solid rgba(120, 220, 255, 0.35);
+    color: #e8f6ff;
+    font-weight: 600; font-size: 12px; letter-spacing: 0.4px;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .action-btn:hover { box-shadow: 0 0 18px rgba(0, 212, 255, 0.35); border-color: rgba(120, 220, 255, 0.7); }
 
   /* Bottom strip */
   .bottom {
@@ -386,40 +361,41 @@
   .log-line { display: flex; gap: 10px; }
   .log-ts { color: #58758c; }
   .log-msg { color: #b0caee; }
-  
-  .action-btn {
-    padding: 8px 14px; border-radius: 10px;
-    background: linear-gradient(180deg, rgba(0,212,255,0.22), rgba(45,122,255,0.12));
-    border: 1px solid rgba(120, 220, 255, 0.35);
-    color: #e8f6ff;
-    font-weight: 600; font-size: 12px; letter-spacing: 0.4px;
-    cursor: pointer;
-    transition: all .2s ease;
-  }
-  .action-btn:hover {
-    box-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
-    border-color: rgba(120, 220, 255, 0.7);
-  }
 
   /* Tabs */
-  .tab-view { display: none; height: 100%; }
-  .tab-view.active { display: flex; }
+  .tab-view { display: none; position: absolute; inset: 0; }
+  .tab-view.active { display: grid; }
 
-  /* Chat placeholder */
+  /* Chat */
   .chat-area {
-    flex: 1; display: flex; flex-direction: column; gap: 8px;
-    padding: 8px 4px; overflow: hidden;
+    display: flex; flex-direction: column; gap: 8px; padding: 10px;
+    overflow: hidden;
   }
   .chat-msg {
-    max-width: 70%;
+    max-width: 68%;
     padding: 8px 12px;
-    border-radius: 12px;
-    background: var(--bg-card);
+    border-radius: 14px;
+    background: rgba(7,18,36,0.82);
     border: 1px solid var(--border);
     font-size: 12.5px;
   }
 
-  /* Footer badges */
+  /* Status views */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+    overflow: auto;
+  }
+  .kpi {
+    background: rgba(7,18,36,0.72);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 8px; border-radius: 8px;
@@ -427,56 +403,50 @@
     border: 1px solid rgba(120,220,255,0.25);
     font-size: 11px; color: var(--text-muted);
   }
-  .badge-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #4ef0a0;
-    box-shadow: 0 0 8px rgba(78, 240, 160, 0.6);
-  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ef0a0; box-shadow: 0 0 8px rgba(78,240,160,0.7); }
 </style>
 </head>
 <body>
   <div class="shell">
-    <!-- Sidebar -->
     <aside class="sidebar glass">
       <div class="profile-orb" title="Agent Smith"></div>
       <div class="nav-item active" data-tab="tab-home">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span class="tooltip">Home</span>
+        <span style="width:18px;height:18px;opacity:.9">🏠</span>
+        <span>Home</span>
       </div>
       <div class="nav-item" data-tab="tab-chat">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span class="tooltip">Chat</span>
+        <span style="width:18px;height:18px;opacity:.9">💬</span>
+        <span>Chat</span>
       </div>
       <div class="nav-item" data-tab="tab-agents">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
-        <span class="tooltip">Agents</span>
+        <span style="width:18px;height:18px;opacity:.9">🕹</span>
+        <span>Agents</span>
       </div>
       <div class="nav-item" data-tab="tab-schedule">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <span class="tooltip">Schedule</span>
+        <span style="width:18px;height:18px;opacity:.9">🗓</span>
+        <span>Schedule</span>
       </div>
       <div class="nav-item" data-tab="tab-memory">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-        <span class="tooltip">Memory</span>
+        <span style="width:18px;height:18px;opacity:.9">🧠</span>
+        <span>Memory</span>
       </div>
       <div class="nav-item" data-tab="tab-files">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-        <span class="tooltip">Files</span>
+        <span style="width:18px;height:18px;opacity:.9">🗂</span>
+        <span>Files</span>
       </div>
       <div class="nav-item" data-tab="tab-settings">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span class="tooltip">Settings</span>
+        <span style="width:18px;height:18px;opacity:.9">⚙️</span>
+        <span>Settings</span>
       </div>
       <div class="system-pip" title="System Online"></div>
     </aside>
 
-    <!-- Topbar -->
     <header class="topbar glass">
       <div class="brand">
-        <div style="width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue)); box-shadow: 0 0 14px var(--glow-cyan);"></div>
+        <div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue));box-shadow:0 0 14px var(--glow-cyan);"></div>
         <span>Agent Smith</span>
         <span class="status-pill">
-          <span style="width:8px;height:8px;border-radius:50%;background:#4ef0a0;box-shadow: 0 0 8px rgba(78,240,160,0.7);"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#4ef0a0;box-shadow:0 0 8px rgba(78,240,160,.7);"></span>
           ONLINE
         </span>
       </div>
@@ -487,142 +457,132 @@
       </div>
     </header>
 
-    <!-- Main workspace with overlay tabs -->
     <section class="main">
-      <!-- HOME DASHBOARD -->
-      <div id="tab-home" class="tab-view active" style="position:absolute; inset:0;">
-        <div class="panels-grid">
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Active Agents</div>
-              <div class="panel-value">12</div>
-            </div>
-            <div class="panel-meta">7 running · 5 idle</div>
+      <div id="tab-home" class="tab-view active" style="grid-template-columns:260px 1fr 220px; padding:10px; gap:10px;">
+        <div class="pane">
+          <div class="list-card">
+            <div class="panel-title">Active Agents</div>
+            <div class="panel-meta" style="margin-bottom:4px;">7 running · 5 idle</div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Brand Voice</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Intelligence</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Marketing</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Operations</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot y"></span>Sales</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Fulfillment</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Onboarding</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Social</div></div>
           </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Recent Tasks</div>
-              <div class="panel-value">38</div>
-            </div>
+
+          <div class="list-card">
+            <div class="panel-title">Schedule Queue</div>
+            <div class="list-row"><div class="agent-chip"><span class="dot y"></span>06:06 AM</div><div class="panel-meta">Daily</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>06:05 PM</div><div class="panel-meta">Weekly</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot y"></span>09:00 AM</div><div class="panel-meta">Daily</div></div>
+          </div>
+
+          <div class="list-card" style="flex:1;">
+            <div class="panel-title">Recent Tasks</div>
+            <div class="panel-value">38</div>
             <div class="panel-meta">+14 today</div>
           </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Schedule Queue</div>
-              <div class="panel-value">9</div>
-            </div>
-            <div class="panel-meta">Next 60m</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Memory Snapshot</div>
-              <div class="panel-value">1.2<span style="font-size:12px;color:#7aa5c8;margin-left:4px;">GB</span></div>
-            </div>
-            <div class="panel-meta">24 vectors loaded</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Connected Tools</div>
-              <div class="panel-value">8</div>
-            </div>
-            <div class="panel-meta">All healthy</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Model Routing</div>
-              <div class="panel-value">3</div>
-            </div>
-            <div class="panel-meta">Auto · balanced</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">System Health</div>
-              <div class="panel-value">98<span style="font-size:12px;color:#7aa5c8;margin-left:3px;">%</span></div>
-            </div>
-            <div class="panel-meta">CPU 28% · 3.1GHz</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Workflow History</div>
-              <div class="panel-value">142</div>
-            </div>
-            <div class="panel-meta">Last 7d</div>
-          </div>
-          <div class="data-panel">
-            <div>
-              <div class="panel-title">Uptime</div>
-              <div class="panel-value">26<span style="font-size:12px;color:#7aa5c8;margin-left:4px;">h 12m</span></div>
-            </div>
-            <div class="panel-meta">Session 7</div>
+        </div>
+
+        <div style="position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius); background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55));">
+          <div class="orb-zone">
+            <div class="orb" id="mainOrb"></div>
+            <div class="orb-rings"></div>
+            <div class="orb-core"></div>
+            <div class="orbit"></div>
+            <div class="orbit slow"></div>
           </div>
         </div>
 
-        <!-- Central orb -->
-        <div class="orb-zone">
-          <div class="orb" id="mainOrb"></div>
-          <div class="orb-rings"></div>
-          <div class="orb-core"></div>
-          <div class="orbit"></div>
-          <div class="orbit slow"></div>
+        <div class="pane">
+          <div class="status-card">
+            <div class="status-label">Agency Overview</div>
+            <div class="status-grid" style="padding:0; margin-top:6px;">
+              <div><div class="panel-title">Active</div><div class="panel-value">0</div></div>
+              <div><div class="panel-title">Low</div><div class="panel-value">0</div></div>
+              <div><div class="panel-title">High</div><div class="panel-value">0</div></div>
+              <div><div class="panel-title">Urgent</div><div class="panel-value">0</div></div>
+            </div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Agent Tasks</div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Research</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot y"></span>Draft</div></div>
+            <div class="list-row"><div class="agent-chip"><span class="dot g"></span>Review</div></div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Pipeline</div>
+            <div class="panel-value">118</div>
+            <div class="panel-meta">Won 100 · MRR $36.7K</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Appointments</div>
+            <div class="panel-meta">No upcoming events</div>
+          </div>
+          <div class="mini-chart"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="action-btn" onclick="setOrbState('idle')">Reset</button>
+            <button class="action-btn" onclick="setOrbState('listening')">Listen</button>
+            <button class="action-btn" onclick="setOrbState('speaking')">Speak</button>
+          </div>
         </div>
       </div>
 
-      <!-- CHAT TAB -->
-      <div id="tab-chat" class="tab-view" style="position:absolute; inset:0; padding: 14px;">
+      <div id="tab-chat" class="tab-view" style="display:none; padding:14px;">
         <div class="glass chat-area">
-          <div class="chat-msg">[System] Agent Smith initialized. Voice mode ready.</div>
+          <div class="chat-msg">[System] Agent Smith initialized.</div>
           <div class="chat-msg" style="align-self:flex-end; border-color: rgba(120, 220, 255, 0.35);">How can I help?</div>
-          <div class="chat-msg">Ready for your next command.</div>
+          <div class="chat-msg">Ready.</div>
         </div>
       </div>
 
-      <!-- AGENTS TAB -->
-      <div id="tab-agents" class="tab-view" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center;">
-        <div class="glass" style="padding:24px; text-align:center;">
-          <div class="panel-title">Agent Roster</div>
-          <div class="panel-value" style="margin-top:10px;">12 Agents</div>
-          <div class="panel-meta" style="margin-top:6px;">Manage routing and constraints</div>
+      <div id="tab-agents" class="tab-view" style="display:none; padding:14px; overflow:auto;">
+        <div class="status-grid">
+          <div class="kpi"><div class="panel-title">Agents Live</div><div class="panel-value">12</div><div class="panel-meta">7 running</div></div>
+          <div class="kpi"><div class="panel-title">Idle</div><div class="panel-value">5</div><div class="panel-meta">Awaiting tasks</div></div>
+          <div class="kpi"><div class="panel-title">Controls</div><div class="panel-meta">Routing + policies</div></div>
+          <div class="kpi"><div class="panel-title">Capacity</div><div class="panel-meta">Low load</div></div>
         </div>
       </div>
 
-      <!-- SCHEDULE TAB -->
-      <div id="tab-schedule" class="tab-view" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center;">
-        <div class="glass" style="padding:24px; text-align:center;">
-          <div class="panel-title">Schedules</div>
-          <div class="panel-value" style="margin-top:10px;">9 Queued</div>
-          <div class="panel-meta" style="margin-top:6px;">Create, edit, or pause jobs</div>
+      <div id="tab-schedule" class="tab-view" style="display:none; padding:14px; overflow:auto;">
+        <div class="status-grid">
+          <div class="kpi"><div class="panel-title">Queued</div><div class="panel-value">9</div></div>
+          <div class="kpi"><div class="panel-title">Next</div><div class="panel-meta">06:06 AM</div></div>
+          <div class="kpi"><div class="panel-title">Frequency</div><div class="panel-meta">Daily/Weekly</div></div>
+          <div class="kpi"><div class="panel-title">Controls</div><div class="panel-meta">Pause · skip</div></div>
         </div>
       </div>
 
-      <!-- MEMORY TAB -->
-      <div id="tab-memory" class="tab-view" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center;">
-        <div class="glass" style="padding:24px; text-align:center;">
-          <div class="panel-title">Memory</div>
-          <div class="panel-value" style="margin-top:10px;">1.2 GB</div>
-          <div class="panel-meta" style="margin-top:6px;">Vectors · snapshots · pruning</div>
+      <div id="tab-memory" class="tab-view" style="display:none; padding:14px; overflow:auto;">
+        <div class="status-grid">
+          <div class="kpi"><div class="panel-title">Snapshot</div><div class="panel-value">1.2 GB</div></div>
+          <div class="kpi"><div class="panel-title">Vectors</div><div class="panel-value">24</div></div>
+          <div class="kpi"><div class="panel-title">Notes</div><div class="panel-value">518</div></div>
+          <div class="kpi"><div class="panel-title">Links</div><div class="panel-value">582</div></div>
         </div>
       </div>
 
-      <!-- FILES TAB -->
-      <div id="tab-files" class="tab-view" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center;">
-        <div class="glass" style="padding:24px; text-align:center;">
-          <div class="panel-title">Files</div>
-          <div class="panel-value" style="margin-top:10px;">Browsing Ready</div>
-          <div class="panel-meta" style="margin-top:6px;">Obsidian, PDF, docs</div>
+      <div id="tab-files" class="tab-view" style="display:none; padding:14px; overflow:auto;">
+        <div class="status-grid">
+          <div class="kpi"><div class="panel-title">Obsidian</div><div class="panel-meta">KING BRAIN connected</div></div>
+          <div class="kpi"><div class="panel-title">Drive</div><div class="panel-meta">Synced</div></div>
+          <div class="kpi"><div class="panel-title">Upload</div><div class="panel-meta">Docs · PDF</div></div>
         </div>
       </div>
 
-      <!-- SETTINGS TAB -->
-      <div id="tab-settings" class="tab-view" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center;">
-        <div class="glass" style="padding:24px; text-align:center;">
-          <div class="panel-title">Settings</div>
-          <div class="panel-value" style="margin-top:10px;">Config</div>
-          <div class="panel-meta" style="margin-top:6px;">Models · providers · tabs</div>
+      <div id="tab-settings" class="tab-view" style="display:none; padding:14px; overflow:auto;">
+        <div class="status-grid">
+          <div class="kpi"><div class="panel-title">Models</div><div class="panel-meta">Claude · OpenAI</div></div>
+          <div class="kpi"><div class="panel-title">Voice</div><div class="panel-meta">ElevenLabs ready</div></div>
+          <div class="kpi"><div class="panel-title">Tabs</div><div class="panel-meta">Aion · Paperclip</div></div>
         </div>
       </div>
     </section>
 
-    <!-- Right panel -->
     <aside class="right-panel glass">
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <div class="status-label">Mission Control</div>
@@ -644,74 +604,60 @@
         <div class="panel-meta" style="margin-top:6px;">Listening off</div>
       </div>
       <div class="mini-chart"></div>
-      <div style="margin-top:auto; display:flex; gap:8px;">
-        <button class="action-btn" onclick="setOrbState('idle')">Reset</button>
-        <button class="action-btn" onclick="setOrbState('listening')">Listen</button>
-        <button class="action-btn" onclick="setOrbState('speaking')">Speak</button>
-      </div>
     </aside>
 
-    <!-- Bottom strip -->
     <footer class="bottom glass">
       <div class="console-log" id="consoleLog">
-        <div class="log-line"><span class="log-ts">03:32:11</span><span class="log-msg">[core] Agent Smith boot sequence started</span></div>
-        <div class="log-line"><span class="log-ts">03:32:12</span><span class="log-msg">[models] Loaded Claude 3.5 Sonnet</span></div>
-        <div class="log-line"><span class="log-ts">03:32:12</span><span class="log-msg">[voice] ElevenLabs endpoint ready</span></div>
-        <div class="log-line"><span class="log-ts">03:32:13</span><span class="log-msg">[obsidian] Vault mounted: /Users/oddballgenius/Documents/KING BRAIN</span></div>
-        <div class="log-line"><span class="log-ts">03:32:14</span><span class="log-msg">[paperclip] Runtime connected on 127.0.0.1:3100</span></div>
+        <div class="log-line"><span class="log-ts">00:00:00</span><span class="log-msg">[core] Agent Smith boot sequence started</span></div>
+        <div class="log-line"><span class="log-ts">00:00:01</span><span class="log-msg">[models] Loaded Claude 3.5 Sonnet</span></div>
+        <div class="log-line"><span class="log-ts">00:00:01</span><span class="log-msg">[voice] ElevenLabs endpoint ready</span></div>
       </div>
     </footer>
   </div>
-
-<script>
-  // Navigation / tab switching
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-      const tabId = item.getAttribute('data-tab');
-      document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
-      const target = document.getElementById(tabId);
-      if (target) {
-        target.classList.add('active');
-        target.style.display = 'flex';
-      }
+  <script>
+    const tabMap = { 'tab-home': true, 'tab-chat': true, 'tab-agents': true, 'tab-schedule': true, 'tab-memory': true, 'tab-files': true, 'tab-settings': true };
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        const tabId = item.getAttribute('data-tab');
+        document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+        const target = document.getElementById(tabId);
+        if (!target) return;
+        target.style.display = 'grid';
+        if (tabId === 'tab-home') target.style.gridTemplateColumns = '260px 1fr 220px';
+      });
     });
-  });
 
-  // Orb state management
-  const orb = document.getElementById('mainOrb');
-  function setOrbState(state) {
-    orb.className = 'orb ' + (state === 'idle' ? '' : 'state-' + state);
-    const voiceText = state === 'idle' ? 'Idle' : state === 'listening' ? 'Listening' : 'Speaking';
-    appendLog('voice', `Voice state → ${voiceText}`);
-  }
-  window.setOrbState = setOrbState;
+    const orb = document.getElementById('mainOrb');
+    function setOrbState(state) {
+      orb.className = 'orb ' + (state === 'idle' ? '' : 'state-' + state);
+      const voiceText = state === 'idle' ? 'Idle' : state === 'listening' ? 'Listening' : 'Speaking';
+      appendLog('voice', 'Voice state -> ' + voiceText);
+    }
+    window.setOrbState = setOrbState;
 
-  // Console log appender
-  function appendLog(channel, msg) {
-    const log = document.getElementById('consoleLog');
-    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
-    const line = document.createElement('div');
-    line.className = 'log-line';
-    line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-msg">[${channel}] ${msg}</span>`;
-    log.appendChild(line);
-    log.scrollTop = log.scrollHeight;
-  }
-  window.appendLog = appendLog;
+    function appendLog(channel, msg) {
+      const log = document.getElementById('consoleLog');
+      const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = '<span class="log-ts">' + ts + '</span><span class="log-msg">[' + channel + '] ' + msg + '</span>';
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+    window.appendLog = appendLog;
 
-  // Live simulation ticks
-  setInterval(() => {
-    const msgs = [
-      ['heartbeat', 'System tick OK'],
-      ['metrics', 'Scheduler heartbeats nominal'],
-      ['network', 'Outbound channels stable'],
-      ['voice', 'Audio stream ping'],
-      ['obsidian', 'Sync check — vault reachable']
-    ];
-    const [ch, text] = msgs[Math.floor(Math.random() * msgs.length)];
-    appendLog(ch, text);
-  }, 4000);
-</script>
+    setInterval(() => {
+      const msgs = [
+        ['heartbeat', 'System tick OK'],
+        ['metrics', 'Scheduler heartbeats nominal'],
+        ['network', 'Outbound channels stable'],
+        ['voice', 'Audio stream ping'],
+      ];
+      const [ch, text] = msgs[Math.floor(Math.random() * msgs.length)];
+      appendLog(ch, text);
+    }, 4000);
+  </script>
 </body>
 </html>
