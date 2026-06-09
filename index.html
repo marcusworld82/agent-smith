@@ -101,7 +101,13 @@
     padding: 12px 10px;
     gap: 6px;
     overflow-y: auto;
+    transition: width .28s ease, padding .28s ease;
+    width: 220px;
+    min-width: 62px;
   }
+  .sidebar.collapsed .nav-item span:not(:first-child),
+  .sidebar.collapsed .profile-orb { display: none; }
+  .sidebar.collapsed { width: 66px; padding: 12px 6px; }
   .profile-orb {
     width: 36px; height: 36px; border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-blue));
@@ -195,8 +201,9 @@
     display: grid;
     grid-template-columns: 260px 1fr 220px;
     gap: 10px; padding: 10px;
+    align-items: center;
   }
-  .pane { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .pane { display: flex; flex-direction: column; gap: 10px; min-height: 0; align-self: stretch; }
   .data-panel {
     background: rgba(7,18,36,0.72);
     border: 1px solid var(--border);
@@ -390,8 +397,17 @@
   .log-msg { color: #b0caee; }
 
   /* Tabs */
-  .tab-view { display: none; position: absolute; inset: 0; }
-  .tab-view.active { display: grid; }
+  .tab-view {
+    position: absolute; inset: 0;
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: opacity .22s ease, transform .22s ease, visibility 0s linear .22s;
+    pointer-events: none;
+  }
+  .tab-view.active {
+    opacity: 1; visibility: visible; transform: translateY(0);
+    transition: opacity .22s ease, transform .22s ease, visibility 0s linear 0s;
+    pointer-events: auto;
+  }
 
   /* Chat */
   .chat-shell {
@@ -468,10 +484,11 @@
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
   .iframe-wrap {
-    flex: 1; position: relative; overflow: hidden;
+    flex: 1 1 auto; position: relative; overflow: hidden;
     border: 1px solid var(--border); border-radius: var(--radius);
     background: linear-gradient(180deg, rgba(6,16,34,0.55), rgba(4,14,28,0.55));
     min-height: 0;
+    height: 100%;
   }
   .iframe-wrap iframe {
     position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
@@ -582,8 +599,13 @@
       <input class="cmd-field" placeholder="Command or search..." aria-label="Command or search" />
       <div id="clockDisplay" style="font-family:var(--font-mono); font-size:12px; letter-spacing:0.6px; color:#8aaac5; min-width:68px; text-align:center;">00:00:00</div>
       <div class="chips">
-        <div class="chip">Claude 3.5 Sonnet</div>
+        <div class="chip" id="modelChip" style="cursor:pointer;" title="Switch model">Claude 3.5 Sonnet</div>
         <div class="chip">v2.4.1</div>
+      </div>
+      <div id="modelMenu" style="display:none; position:absolute; margin-top:34px; right:calc(100% + 8px); background:rgba(7,18,36,0.95); border:1px solid rgba(120,220,255,0.35); border-radius:12px; padding:6px; min-width:220px; box-shadow: 0 16px 40px rgba(0,0,0,0.45);">
+        <div class="model-option" style="padding:8px 10px; border-radius:10px; cursor:pointer;" data-model="claude-sonnet">Claude 3.5 Sonnet</div>
+        <div class="model-option" style="padding:8px 10px; border-radius:10px; cursor:pointer;" data-model="gpt-4o">GPT-4o</div>
+        <div class="model-option" style="padding:8px 10px; border-radius:10px; cursor:pointer;" data-model="claude-opus">Claude Opus 4</div>
       </div>
     </header>
 
@@ -751,11 +773,27 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         item.classList.add('active');
         const tabId = item.getAttribute('data-tab');
-        document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
         const target = document.getElementById(tabId);
         if (!target) return;
-        target.style.display = 'grid';
+        target.classList.add('active');
         if (tabId === 'tab-home') target.style.gridTemplateColumns = '260px 1fr 220px';
+      });
+    });
+
+    document.getElementById('modelChip')?.addEventListener('click', e => {
+      const menu = document.getElementById('modelMenu');
+      if (!menu) return;
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+    document.querySelectorAll('.model-option').forEach(opt => {
+      opt.addEventListener('click', e => {
+        const chip = document.getElementById('modelChip');
+        if (!chip) return;
+        const label = e.target.textContent;
+        chip.textContent = label;
+        document.getElementById('modelMenu').style.display = 'none';
+        appendLog('models', 'Model switched -> ' + label);
       });
     });
 
@@ -778,12 +816,44 @@
     }
     window.appendLog = appendLog;
 
+    // Sidebar toggle for compact mode
+    window.toggleSidebar = function () {
+      const sb = document.querySelector('.sidebar');
+      if (!sb) return;
+      sb.classList.toggle('collapsed');
+      appendLog('ui', 'Sidebar collapsed: ' + String(sb.classList.contains('collapsed')));
+    };
+
+    // Live API hook: Anthropic/Claude - replace this with your fetch()
+    // to https://api.anthropic.com/v1/messages and stream/rotate responses.
+    // current placeholder iterates a mock response set.
+    async function anthropicApiHook(userText) {
+      appendLog('net', 'API request -> Anthropic: ' + userText);
+      const mock = [
+        'I can help with that, Marcus.',
+        'Running task through this workflow now.',
+        'Routing to the best available agent.',
+        'Confirmed. I’ll update the status panel.'
+      ];
+      return mock.reverse().shift() || 'Acknowledged';
+    }
+    window.anthropicApiHook = anthropicApiHook;
+
+    // Live API hook: ElevenLabs TTS - returns an audio blob for playback.
+    // Replace endpoint/voice with real voice_id.
+    async function elevenLabsTtsHook(text) {
+      appendLog('voice', 'TTS requested: ' + text.slice(0, 40));
+      return null;
+    }
+    window.elevenLabsTtsHook = elevenLabsTtsHook;
+
+    // Periodic live state pulse
     setInterval(() => {
       const msgs = [
         ['heartbeat', 'System tick OK'],
         ['metrics', 'Scheduler heartbeats nominal'],
         ['network', 'Outbound channels stable'],
-        ['voice', 'Audio stream ping'],
+        ['voice', 'Audio stream ping']
       ];
       const [ch, text] = msgs[Math.floor(Math.random() * msgs.length)];
       appendLog(ch, text);
